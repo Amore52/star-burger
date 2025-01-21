@@ -61,6 +61,7 @@ def product_list_api(request):
 
 def register_order(request):
     order_content = json.loads(request.body.decode())
+    print(order_content)
     order = Order.objects.create(
         adress=order_content['address'],
         name=order_content['firstname'],
@@ -68,9 +69,9 @@ def register_order(request):
         contact_phone=order_content['phonenumber'],
     )
     items = order_content.get('products', [])
-    for item_data in items:
-        product_id = item_data['product']
-        quantity = item_data.get('quantity', 1)
+    for item in items:
+        product_id = item['product']
+        quantity = item.get('quantity', 1)
         product = Product.objects.get(id=product_id)
         OrderItem.objects.create(
             order=order,

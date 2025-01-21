@@ -143,6 +143,7 @@ class Order(models.Model):
         blank=True,
         validators=[MinValueValidator(12), MaxValueValidator(12)]
     )
+    order_date = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'заказ'

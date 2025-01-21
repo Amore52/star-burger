@@ -101,23 +101,39 @@ class ProductAdmin(admin.ModelAdmin):
     get_image_list_preview.short_description = 'превью'
 
 
-@admin.register(ProductCategory)
-class ProductAdmin(admin.ModelAdmin):
-    pass
-
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    extra = 1
-    fields = ['product', 'quantity']
-    readonly_fields = []
+    extra = 0
+    readonly_fields = ['total_price']
+    fields = ['product', 'quantity', 'total_price']
+
+    def total_price(self, obj):
+        return obj.product.price * obj.quantity
+
+    total_price.short_description = 'Общая цена'
+
+
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = [
+        'id',
         'name',
         'second_name',
         'adress',
+        'contact_phone',
+        'get_total',
+        'order_date',
     ]
     inlines = [OrderItemInline]
+    readonly_fields = ['get_total', 'order_date']
+    search_fields = ['name', 'second_name', 'adress', 'contact_phone']
 
+    def get_total(self, obj):
+        return sum(item.product.price * item.quantity for item in obj.order_items.all())
+    get_total.short_description = 'Сумма заказа'
+
+    def get_order_date(self, obj):
+        return obj.order_date.strftime('%Y-%m-%d %H:%M:%S')
+    get_order_date.short_description = 'Дата заказа'
