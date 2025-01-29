@@ -64,44 +64,18 @@ def product_list_api(request):
     })
 
 
-def product_list_api(request):
-    products = Product.objects.select_related('category').available()
-
-    dumped_products = []
-    for product in products:
-        dumped_product = {
-            'id': product.id,
-            'name': product.name,
-            'price': product.price,
-            'special_status': product.special_status,
-            'description': product.description,
-            'category': {
-                'id': product.category.id,
-                'name': product.category.name,
-            } if product.category else None,
-            'image': product.image.url,
-            'restaurant': {
-                'id': product.id,
-                'name': product.name,
-            }
-        }
-        dumped_products.append(dumped_product)
-    return Response(dumped_products)
-
-
 @api_view(['POST'])
 def register_order(request):
     try:
-        registered_order  = request.data
+        registered_order = request.data
         required_keys = ['products', 'firstname', 'lastname', 'phonenumber', 'address']
         phone_regex = re.compile(r'^\+79[0-9]{9}$')
         empty_keys = [key for key in required_keys if key not in registered_order or not registered_order[key]]
         if empty_keys:
             return Response(f'error: {empty_keys}: поле не может быть пустым', status=status.HTTP_400_BAD_REQUEST)
-
         if not isinstance(registered_order['products'], list):
-            return Response({'error': 'products: Ожидался list со значениями, но был получен "str".'}, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response({'error': 'products: Ожидался list со значениями, но был получен "str".'},
+                            status=status.HTTP_400_BAD_REQUEST)
         if not phone_regex.match(registered_order['phonenumber']):
             return Response({'error': 'phonenumber: Введен некорректный номер телефона'},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -122,9 +96,9 @@ def register_order(request):
                 product=product,
                 quantity=product_item['quantity']
             )
-            serializer = OrderSerializer(order)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response({'order_id': order.id}, status=status.HTTP_201_CREATED)
+        serializer = OrderSerializer(order)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     except ValidationError as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
