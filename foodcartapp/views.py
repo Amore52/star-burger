@@ -1,3 +1,4 @@
+import re
 
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
@@ -61,7 +62,7 @@ def product_list_api(request):
         'indent': 4,
     })
 
-@api_view(['GET'])
+
 def product_list_api(request):
     products = Product.objects.select_related('category').available()
 
@@ -90,20 +91,28 @@ def product_list_api(request):
 @api_view(['POST'])
 def register_order(request):
     try:
-        order_data = request.data
-        if 'products' not in order_data or not order_data['products']:
-            return Response({'error': 'Обязательное поле products отсутствует или пусто'}, status=status.HTTP_400_BAD_REQUEST)
-        if not isinstance(order_data['products'], list):
-            return Response({'error': 'products должен быть списком'}, status=status.HTTP_400_BAD_REQUEST)
+        registered_order  = request.data
+        required_keys = ['products', 'firstname', 'lastname', 'phonenumber', 'address']
+        phone_regex = re.compile(r'^\+79[0-9]{9}$')
+        empty_keys = [key for key in required_keys if key not in registered_order or not registered_order[key]]
+        if empty_keys:
+            return Response(f'error: {empty_keys}: поле не может быть пустым', status=status.HTTP_400_BAD_REQUEST)
+
+        if not isinstance(registered_order['products'], list):
+            return Response({'error': 'products: Ожидался list со значениями, но был получен "str".'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not phone_regex.match(registered_order['phonenumber']):
+            return Response({'error': 'phonenumber: Введен некорректный номер телефона'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         order = Order.objects.create(
-            firstname=order_data.get('firstname'),
-            lastname=order_data.get('lastname'),
-            phonenumber=order_data.get('phonenumber'),
-            address=order_data.get('address'),
+            firstname=registered_order.get('firstname'),
+            lastname=registered_order.get('lastname'),
+            phonenumber=registered_order.get('phonenumber'),
+            address=registered_order.get('address'),
         )
 
-        for product_item in order_data['products']:
+        for product_item in registered_order['products']:
             if 'product' not in product_item or 'quantity' not in product_item:
                 raise ValidationError('Каждый продукт должен содержать product и quantity')
             product = get_object_or_404(Product, id=product_item['product'])
