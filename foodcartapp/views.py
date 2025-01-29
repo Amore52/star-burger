@@ -9,6 +9,7 @@ from django.templatetags.static import static
 from rest_framework.response import Response
 
 from .models import Product, Order, OrderItem
+from .serializers import OrderSerializer
 
 
 def banners_list_api(request):
@@ -121,6 +122,8 @@ def register_order(request):
                 product=product,
                 quantity=product_item['quantity']
             )
+            serializer = OrderSerializer(order)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response({'order_id': order.id}, status=status.HTTP_201_CREATED)
     except ValidationError as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
