@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator
 from django.db.models import Sum, F
 from phonenumber_field.modelfields import PhoneNumberField
 
+
 class Restaurant(models.Model):
     name = models.CharField('название', max_length=50)
     address = models.CharField('адрес', max_length=100, blank=True,)
@@ -91,6 +92,13 @@ class OrderItem(models.Model):
     order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ordered_items', verbose_name='Продукт')
     quantity = models.PositiveIntegerField(verbose_name='Количество')
+    price = models.DecimalField(
+        'цена',
+        max_digits=8,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        default=0
+    )
 
     class Meta:
         verbose_name = 'Элемент заказа'
