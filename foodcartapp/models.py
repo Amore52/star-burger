@@ -46,10 +46,10 @@ class Product(models.Model):
         on_delete=models.SET_NULL,
     )
     price = models.DecimalField(
-        'цена',
         max_digits=8,
         decimal_places=2,
-        validators=[MinValueValidator(0)]
+        validators=[MinValueValidator(0)],
+        verbose_name='цена',
     )
     image = models.ImageField('картинка')
     special_status = models.BooleanField('спец.предложение', default=False, db_index=True,)
@@ -88,30 +88,6 @@ class RestaurantMenuItem(models.Model):
     def __str__(self):
         return f"{self.restaurant.name} - {self.product.name}"
 
-class OrderItem(models.Model):
-    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ordered_items', verbose_name='Продукт')
-    quantity = models.PositiveIntegerField(verbose_name='Количество')
-    price = models.DecimalField(
-        'цена',
-        max_digits=8,
-        decimal_places=2,
-        validators=[MinValueValidator(0)],
-        default=0
-    )
-
-    class Meta:
-        verbose_name = 'Элемент заказа'
-        verbose_name_plural = 'Элементы заказа'
-
-    def __str__(self):
-        return f'{self.product.name} {self.quantity} шт.'
-
-class OrderQuerySet(models.QuerySet):
-    def with_total_cost(self):
-        return self.prefetch_related('items', 'items__product').annotate(
-            total_cost=Sum(F('items__quantity') * F('items__product__price'))
-        )
 
 class OrderManager(models.Manager):
     def get_queryset(self):
@@ -119,6 +95,7 @@ class OrderManager(models.Manager):
 
     def with_total_cost(self):
         return self.get_queryset().with_total_cost()
+
 
 class Order(models.Model):
     firstname = models.CharField(max_length=20, verbose_name='Имя')
@@ -134,3 +111,36 @@ class Order(models.Model):
 
     def __str__(self):
         return f'Заказ №{self.id}'
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ordered_items', verbose_name='Продукт')
+    quantity = models.PositiveIntegerField(verbose_name='Количество')
+    price = models.DecimalField(
+        'цена',
+        max_digits=8,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        null=False,
+        blank=False,
+    )
+
+
+    class Meta:
+        verbose_name = 'Элемент заказа'
+        verbose_name_plural = 'Элементы заказа'
+
+    def __str__(self):
+        return f'{self.product.name} {self.quantity} шт.'
+
+
+class OrderQuerySet(models.QuerySet):
+    def with_total_cost(self):
+        return self.prefetch_related('items').annotate(
+            total_cost=Sum(F('items__price'))
+        )
+
+
+
+
