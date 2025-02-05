@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Sum, F
 from django.shortcuts import reverse
 from django.templatetags.static import static
 from django.utils.html import format_html
@@ -9,6 +10,7 @@ from .models import Restaurant
 from .models import RestaurantMenuItem
 
 
+
 class RestaurantMenuItemInline(admin.TabularInline):
     model = RestaurantMenuItem
     extra = 0
@@ -16,6 +18,7 @@ class RestaurantMenuItemInline(admin.TabularInline):
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
+    fields = ['product', 'quantity', 'price']
 
 
 @admin.register(Restaurant)
@@ -112,10 +115,16 @@ class ProductAdmin(admin.ModelAdmin):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['firstname', 'lastname', 'address', 'phonenumber']
-    inlines = [
-        OrderItemInline
-    ]
+    inlines = [OrderItemInline]
 
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for instance in instances:
+            if isinstance(instance, OrderItem):
+                if not instance.pk:
+                    instance.price = instance.product.price
+            instance.save()
+        formset.save_m2m()
 
 
 

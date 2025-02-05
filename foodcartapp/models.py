@@ -122,10 +122,7 @@ class OrderItem(models.Model):
         max_digits=8,
         decimal_places=2,
         validators=[MinValueValidator(0)],
-        null=False,
-        blank=False,
     )
-
 
     class Meta:
         verbose_name = 'Элемент заказа'
@@ -134,11 +131,10 @@ class OrderItem(models.Model):
     def __str__(self):
         return f'{self.product.name} {self.quantity} шт.'
 
-
 class OrderQuerySet(models.QuerySet):
     def with_total_cost(self):
         return self.prefetch_related('items').annotate(
-            total_cost=Sum(F('items__price'))
+            total_cost=Sum(F('items__quantity') * F('items__price'))
         )
 
 
