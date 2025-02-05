@@ -90,14 +90,21 @@ class RestaurantMenuItem(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='ordered_items', verbose_name='Продукт')
+    product = models.ForeignKey(Product,
+                                on_delete=models.CASCADE,
+                                related_name='ordered_items',
+                                verbose_name='Продукт',
+                                blank=False,
+                                null=False,
+                                )
     quantity = models.PositiveIntegerField(verbose_name='Количество')
     price = models.DecimalField(
         'цена',
         max_digits=8,
         decimal_places=2,
         validators=[MinValueValidator(0)],
-        default=0
+        blank=False,
+        null=False,
     )
 
     class Meta:
