@@ -105,15 +105,41 @@ class Order(models.Model):
         ('Доставка', 'доставка'),
         ('Выполнен', 'выполнен')
     ]
+    PAYMENT_CHOISES = [
+        ('Наличкой', 'наличкой'),
+        ('Переводом', 'переводом'),
+        ('Картой', 'Картой')
+    ]
     firstname = models.CharField(max_length=20, verbose_name='Имя')
     lastname = models.CharField(max_length=30, verbose_name='Фамилия')
     phonenumber = PhoneNumberField(verbose_name='Телефон')
     address = models.CharField(max_length=100, verbose_name='Адрес')
-    status = models.CharField(max_length=14, choices=STATUS_CHOISES, verbose_name='Статус', default='необработанный')
-    comment = models.TextField(verbose_name='Комментарий к заказу', null=True, blank=True,)
-    registrated_at = models.DateTimeField(default=timezone.now, verbose_name='Дата создания заказа')
-    called_at = models.DateTimeField(verbose_name='Дата звонка', blank=True, null=True)
-    delivered_at = models.DateTimeField(verbose_name='Дата доставки', blank=True, null=True)
+    payment = models.CharField(
+        max_length=9,
+        choices=PAYMENT_CHOISES,
+        default='Уточнить',
+        verbose_name='Способ оплаты')
+    status = models.CharField(
+        max_length=14,
+        choices=STATUS_CHOISES,
+        default='Необработанный',
+        verbose_name='Статус')
+    comment = models.TextField(
+        verbose_name='Комментарий к заказу',
+        default='',
+        null=True,
+        blank=True,)
+    registrated_at = models.DateTimeField(
+        default=timezone.now,
+        verbose_name='Дата создания заказа')
+    called_at = models.DateTimeField(
+        verbose_name='Дата звонка',
+        blank=True,
+        null=True)
+    delivered_at = models.DateTimeField(
+        verbose_name='Дата доставки',
+        blank=True,
+        null=True)
     objects = OrderManager()
 
     class Meta:
