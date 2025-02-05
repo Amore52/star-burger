@@ -24,7 +24,9 @@
         <td>{{ order.total_cost }} </td>
         <td>{{ order.phonenumber }}</td>
         <td>{{ order.address }}</td>
-        <td><a href="{% url 'admin:foodcartapp_order_change' order.id %}">Редактировать</a></td>
+        <td>
+    <a href="{% url 'admin:foodcartapp_order_change' order.id %}?next={{ request.get_full_path }}">Редактировать</a>
+</td>
       </tr>
     {% endfor %}
    </table>

@@ -98,7 +98,15 @@ def register_order(request):
                 price=product.price
             )
         serializer = OrderSerializer(order)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        redirect_url = 'http://127.0.0.1:8000/manager/orders/'
+        response_data = {
+            'message': 'Заказ успешно создан',
+            'order': serializer.data,
+            'redirect_url': redirect_url
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED, headers={
+            'Location': redirect_url
+        })
 
     except ValidationError as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
