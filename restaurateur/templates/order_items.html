@@ -18,8 +18,10 @@
       <th>Адрес доставки</th>
       <th>Способ оплаты</th>
       <th>Комментарий</th>
+      <th>Рестораны</th>
       <th>Ссылка на админку</th>
     </tr>
+
     {% for order in orders %}
       <tr>
         <td>{{ order.id }}</td>
@@ -30,6 +32,22 @@
         <td>{{ order.address }}</td>
         <td>{{ order.payment }}</td>
         <td>{{ order.comment }}</td>
+        <td>
+          {% if order.restaurant %}
+            Готовит: <strong>{{ order.restaurant.name }}</strong>
+          {% else %}
+            <details>
+              <summary>Может быть приготовлен ресторанами:</summary>
+              <ul>
+                {% for restaurant in order.restaurants %}
+                  <li>{{ restaurant.name }}</li>
+                {% empty %}
+                  <li>Нет доступных ресторанов</li>
+                {% endfor %}
+              </ul>
+            </details>
+          {% endif %}
+        </td>
         <td>
     <a href="{% url 'admin:foodcartapp_order_change' order.id %}?next={{ request.get_full_path }}">Редактировать</a>
 </td>

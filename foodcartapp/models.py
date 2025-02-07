@@ -129,6 +129,14 @@ class Order(models.Model):
         default='',
         null=True,
         blank=True,)
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.SET_NULL,
+        related_name='orders',
+        verbose_name='Ресторан',
+        null=True,
+        blank=True,
+    )
     registrated_at = models.DateTimeField(
         default=timezone.now,
         verbose_name='Дата создания заказа')
@@ -148,6 +156,8 @@ class Order(models.Model):
 
     def __str__(self):
         return f'Заказ №{self.id}'
+
+
 
 
 class OrderItem(models.Model):
