@@ -137,7 +137,7 @@ class Order(models.Model):
         null=True,
         blank=True,
     )
-    registrated_at = models.DateTimeField(
+    registered_at = models.DateTimeField(
         default=timezone.now,
         verbose_name='дата создания заказа',
     )
@@ -175,7 +175,7 @@ class OrderItem(models.Model):
         related_name='ordered_items',
         verbose_name='продукт',
     )
-    quantity = models.PositiveIntegerField(verbose_name='количество')
+    quantity = models.PositiveIntegerField(verbose_name='количество', validators=[MinValueValidator(1)])
     price = models.DecimalField(
         max_digits=8,
         decimal_places=2,
