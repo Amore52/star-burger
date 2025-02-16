@@ -2,6 +2,7 @@ import re
 
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
@@ -82,7 +83,8 @@ def register_order(request):
 
         order = serializer.save()
 
-        redirect_url = 'http://127.0.0.1:8000/manager/orders/'
+        redirect_path = reverse('foodcartapp:register_order')
+        redirect_url = request.build_absolute_uri(redirect_path)
         response_data = {
             'message': 'Заказ успешно создан',
             'order': OrderSerializer(order).data,

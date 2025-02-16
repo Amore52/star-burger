@@ -8,7 +8,7 @@ app_name = "foodcartapp"
 urlpatterns = [
     path('products/', product_list_api),
     path('banners/', banners_list_api),
-    path('order/', register_order),
+    path('order/', register_order, name='register_order'),
     path('order/', include('rest_framework.urls')),
 
 ]
