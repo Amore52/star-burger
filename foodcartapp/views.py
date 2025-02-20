@@ -1,15 +1,12 @@
-import re
-
-from django.core.exceptions import ValidationError
-from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED
 
-from .models import Product, Order, OrderItem
+from .models import Product
 from .serializers import OrderSerializer
 
 
@@ -67,34 +64,9 @@ def product_list_api(request):
 
 @api_view(['POST'])
 def register_order(request):
-    try:
-        registered_order = request.data
-        required_keys = ['products', 'firstname', 'lastname', 'phonenumber', 'address']
-        empty_keys = [key for key in required_keys if key not in registered_order or not registered_order[key]]
-        if empty_keys:
-            return Response(f'error: {empty_keys}: поле не может быть пустым', status=status.HTTP_400_BAD_REQUEST)
-        if not isinstance(registered_order['products'], list):
-            return Response({'error': 'products: Ожидался list со значениями, но был получен "str".'},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = OrderSerializer(data=registered_order)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        order = serializer.save()
-
-        redirect_path = reverse('foodcartapp:register_order')
-        redirect_url = request.build_absolute_uri(redirect_path)
-        response_data = {
-            'message': 'Заказ успешно создан',
-            'order': OrderSerializer(order).data,
-            'redirect_url': redirect_url
-        }
-        return Response(response_data, status=status.HTTP_201_CREATED, headers={
-            'Location': redirect_url
-        })
-
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    serializer = OrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
